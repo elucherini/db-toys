@@ -4,6 +4,8 @@ from typing import Any
 
 
 class BaseStorageEngine(ABC):
+    data: Any
+
     @abstractmethod
     def get(self, key: Any) -> Any:
         pass

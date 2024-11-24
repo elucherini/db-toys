@@ -3,6 +3,11 @@ from typing import List, Dict
 
 from base.base import BaseStorageEngine, BaseIO
 
+"""
+Basic log-structured storage engine that appends entries in a CSV-like format ("key,value"), one entry per line.
+It retrieves the most recent entry for the desired key by going through the whole log in reverse order.
+"""
+
 PATH = "log.txt"
 
 
@@ -44,9 +49,9 @@ class BaselineLogStructuredStorageEngine(BaseStorageEngine, CSVLikeIO):
         """
         log = self.read_log(Path(PATH))
 
-        for d in log[::-1]:
-            if key in d:
-                return d[key]
+        for i in range(len(log) - 1, -1, -1):
+            if key in log[i]:
+                return log[i][key]
 
     def data(self):
         return self.read_log(Path(PATH))

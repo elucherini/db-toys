@@ -1,11 +1,23 @@
 from pathlib import Path
 import time
+import sys
+
 from log_structured.baseline import BaselineLogStructuredStorageEngine
 from log_structured.baseline_inmemory import BaselineInMemoryLogStructuredStorageEngine
 
+"""
+Performance testing on each storage engine implemented.
+Note that OOM errors are not tested, only basic memory usage at the end of the test for a quick comparison.
+"""
+
+# Define all storage engine classes to test
+STORAGE_ENGINE_CLASSES = [
+    BaselineLogStructuredStorageEngine,
+    BaselineInMemoryLogStructuredStorageEngine,
+]
 
 # Clean the test log file
-TEST_LOG_PATH = "performance_log.txt"
+TEST_LOG_PATH = "log.txt"
 Path(TEST_LOG_PATH).unlink(missing_ok=True)
 
 
@@ -49,8 +61,16 @@ def test_worst_case_read_performance(engine, non_existing_key: str):
     assert result is None, f"Expected None, but got {result}"
 
 
+def object_size_in_kb(obj):
+    """
+    Returns the size of the given object in KB
+    """
+    size = sys.getsizeof(obj)
+    return size / 1024
+
+
 def run_tests_on_engine(engine_class, num_entries: int):
-    print(f"\nTesting storage engine: {engine_class.__name__}")
+    print(f"\nTesting storage engine: {engine_class.__name__} on {num_entries} entries")
     engine = engine_class()
 
     # Run the performance tests
@@ -58,24 +78,23 @@ def run_tests_on_engine(engine_class, num_entries: int):
     test_read_performance(engine, num_entries)
     test_worst_case_read_performance(engine, "non_existing_key")
 
+    # Memory usage at end of test. The tests I'll run on these toy engines are small in the interest of time, so these
+    # numbers should be evaluated within the context of performance comparison.
+    # E.g., 50 KB is generally tiny, but significantly larger than 0.05 KB.
+    memory_size = object_size_in_kb(engine.data)
+    print(f"Memory usage: {memory_size:.2f} KB")
 
 
 def main():
-    # Define all storage engine classes to test
-    storage_engine_classes = [
-        BaselineLogStructuredStorageEngine,
-        BaselineInMemoryLogStructuredStorageEngine,
-    ]
-
     # Configure test parameters
     num_entries = 10_000
 
-    print(f"Found {len(storage_engine_classes)} storage engines to test:")
-    for engine_class in storage_engine_classes:
+    print(f"Found {len(STORAGE_ENGINE_CLASSES)} storage engines to test:")
+    for engine_class in STORAGE_ENGINE_CLASSES:
         print(f" - {engine_class.__name__}")
 
     # Run tests
-    for engine_class in storage_engine_classes:
+    for engine_class in STORAGE_ENGINE_CLASSES:
         run_tests_on_engine(engine_class, num_entries)
 
     # Cleanup
