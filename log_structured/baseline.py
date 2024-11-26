@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import List, Dict
 
-from base.base import BaseStorageEngine, BaseIO
+from base.storage_engine import BaseStorageEngine
+from storage_io.csv_like_io import CSVLikeIO
 
 """
 Basic log-structured storage engine that appends entries in a CSV-like format ("key,value"), one entry per line.
@@ -9,28 +9,6 @@ It retrieves the most recent entry for the desired key by going through the whol
 """
 
 PATH = "log.txt"
-
-
-class CSVLikeIO(BaseIO):
-    def read_log(self, path: Path) -> List[Dict[str, str]]:
-        with path.open(mode="r") as file:
-            entries = file.readlines()
-
-        log: List[Dict[str, str]] = []
-
-        for entry in entries:
-            clean_entry = entry.strip()
-            if not clean_entry:
-                continue
-            # Split key-value by comma
-            key, value = clean_entry.split(",")
-            log.append({key: value})
-
-        return log
-
-    def append_to_log(self, path: Path, entry: str) -> None:
-        with path.open(mode="a") as file:
-            file.write("\n" + entry)
 
 
 class BaselineLogStructuredStorageEngine(BaseStorageEngine, CSVLikeIO):

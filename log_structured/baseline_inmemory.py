@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from base.base import BaseStorageEngine
+from base.storage_engine import BaseStorageEngine
 
 
 class BaselineInMemoryLogStructuredStorageEngine(BaseStorageEngine):
@@ -20,9 +20,9 @@ class BaselineInMemoryLogStructuredStorageEngine(BaseStorageEngine):
         """
         Retrieves value from given key. O(N).
         """
-        for d in self.data:
-            if key in d:
-                return d[key]
+        for i in range(len(self.data) - 1, -1, -1):
+            if key in self.data[i]:
+                return self.data[i][key]
 
     @property
     def data(self):
