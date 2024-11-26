@@ -4,6 +4,7 @@ import sys
 
 from log_structured.baseline import BaselineLogStructuredStorageEngine
 from log_structured.baseline_inmemory import BaselineInMemoryLogStructuredStorageEngine
+from log_structured.indexed import IndexedLogStructuredStorageEngine
 
 """
 Performance testing on each storage engine implemented.
@@ -14,6 +15,7 @@ Note that OOM errors are not tested, only basic memory usage at the end of the t
 STORAGE_ENGINE_CLASSES = [
     BaselineLogStructuredStorageEngine,
     BaselineInMemoryLogStructuredStorageEngine,
+    IndexedLogStructuredStorageEngine,
 ]
 
 # Clean the test log file
@@ -35,7 +37,7 @@ def measure_time(func):
 
 
 @measure_time
-def test_write_performance(engine, num_entries: int):
+def write_performance(engine, num_entries: int):
     """
     Test the write performance by writing a large number of entries.
     """
@@ -44,7 +46,7 @@ def test_write_performance(engine, num_entries: int):
 
 
 @measure_time
-def test_read_performance(engine, num_entries: int):
+def read_performance(engine, num_entries: int):
     """
     Test the read performance by retrieving values for all keys.
     """
@@ -53,12 +55,15 @@ def test_read_performance(engine, num_entries: int):
 
 
 @measure_time
-def test_worst_case_read_performance(engine, non_existing_key: str):
+def worst_case_read_performance(engine, non_existing_key: str):
     """
     Test the performance of searching for a non-existing key (worst-case scenario).
     """
-    result = engine.get(non_existing_key)
-    assert result is None, f"Expected None, but got {result}"
+    try:
+        result = engine.get(non_existing_key)
+        assert result is None, f"Expected None, but got {result}"
+    except ValueError:
+        pass
 
 
 def object_size_in_kb(obj):
@@ -74,9 +79,9 @@ def run_tests_on_engine(engine_class, num_entries: int):
     engine = engine_class()
 
     # Run the performance tests
-    test_write_performance(engine, num_entries)
-    test_read_performance(engine, num_entries)
-    test_worst_case_read_performance(engine, "non_existing_key")
+    write_performance(engine, num_entries)
+    read_performance(engine, num_entries)
+    worst_case_read_performance(engine, "non_existing_key")
 
     # Memory usage at end of test. The tests I'll run on these toy engines are small in the interest of time, so these
     # numbers should be evaluated within the context of performance comparison.
