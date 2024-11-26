@@ -4,12 +4,13 @@ from base.storage_engine import BaseStorageEngine
 
 
 class BaselineInMemoryLogStructuredStorageEngine(BaseStorageEngine):
-    def __init__(self):
-        self._data: List[Dict[str, str]] = []
-
     """
     Baseline log-structure in-memory storage engine. Any other purely in-memory storage engine must perform better.
     """
+
+    def __init__(self):
+        self._data: List[Dict[str, str]] = []
+
     def set(self, key: str, value: str) -> None:
         """
         Stores key-value pair in memory. O(1)

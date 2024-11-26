@@ -5,6 +5,9 @@ from base.base_io import BaseIO
 
 
 class CSVLikeIO(BaseIO):
+    """
+    IO module that writes each entry on a separate line as "key,value" and
+    """
     def read_log(self, path: Path, offset: None = None) -> List[Dict[str, str]]:
         with path.open(mode="r") as file:
             entries = file.readlines()

@@ -15,6 +15,7 @@ class BaselineLogStructuredStorageEngine(BaseStorageEngine, CSVLikeIO):
     """
     Baseline log-structure storage engine. Any other storage engine must perform better.
     """
+
     def set(self, key: str, value: str) -> None:
         """
         Stores key-value pair in memory. O(1)
