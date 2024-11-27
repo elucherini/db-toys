@@ -1,15 +1,25 @@
 from typing import List, Dict
+from base.base_io import BaseIOManager
+from base.storage_engine import BaseStorageEngineWithIO
 
-from base.storage_engine import BaseStorageEngine
+
+class DummyIOManager(BaseIOManager):
+    """
+    This storage engine is purely in-memory and doesn't need IO
+    """
+    def open(self):
+        pass
 
 
-class BaselineInMemoryLogStructuredStorageEngine(BaseStorageEngine):
+class BaselineInMemoryLogStructuredStorageEngine(BaseStorageEngineWithIO):
     """
     Baseline log-structure in-memory storage engine. Any other purely in-memory storage engine must perform better.
     """
 
-    def __init__(self):
+    def __init__(self, path: str = ""):
         self._data: List[Dict[str, str]] = []
+        self.io_manager = DummyIOManager(path)
+        super().__init__(path)
 
     def set(self, key: str, value: str) -> None:
         """
@@ -36,6 +46,8 @@ def main():
     storage.set("10", "{another example}")
     print(storage.get("42"))
     print(storage.get("10"))
+    storage.set("42", "{updated}")
+    print(storage.get("42"))
     print(storage.data)
 
 

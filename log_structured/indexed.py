@@ -1,32 +1,34 @@
 from pathlib import Path
 from typing import Dict
 
-from storage_io.random_access_io import RandomAccessIO
-from base.storage_engine import BaseStorageEngine
+from storage_io.random_access_log import RandomAccessLogManager
+from base.storage_engine import BaseStorageEngineWithIO
 
 
 PATH = "log.txt"
 
 
-class IndexedLogStructuredStorageEngine(BaseStorageEngine, RandomAccessIO):
+class IndexedLogStructuredStorageEngine(BaseStorageEngineWithIO):
     """
     Storage engine with in-memory index of key offset in file.
     """
     _data: Dict[str, int]
 
-    def __init__(self):
+    def __init__(self, path: str):
         self._data = {}
+        self.io_manager = RandomAccessLogManager(path)
+        super().__init__(path)
 
     def get(self, key: str) -> str:
         if key not in self._data:
             raise ValueError(f"Key {key} not found in DB")
         offset = self._data[key]
-        log = self.read_log(Path(PATH), offset)
+        log = self.io_manager.read(offset)
 
         return log[key]
 
     def set(self, key: str, value: str) -> None:
-        offset = self.append_to_log(Path(PATH), entry=f"{key},{value}")
+        offset = self.io_manager.append(entry=f"{key},{value}")
         self._data[key] = offset
 
     @property
@@ -35,9 +37,10 @@ class IndexedLogStructuredStorageEngine(BaseStorageEngine, RandomAccessIO):
 
 
 def main():
+    # Clean up
     Path(PATH).unlink(missing_ok=True)
 
-    storage = IndexedLogStructuredStorageEngine()
+    storage = IndexedLogStructuredStorageEngine(PATH)
     storage.set("42", "{example example}")
     storage.set("10", "{another example}")
     assert storage.get("42") == "{example example}"
@@ -47,9 +50,12 @@ def main():
 
     try:
         storage.get("nonexistent")
-    except ValueError as e:
-        print("Correctly got ValueError:", e)
+        # should not execute this line
+        assert False
+    except ValueError:
+        pass
 
+    # Clean up
     Path(PATH).unlink(missing_ok=True)
 
 

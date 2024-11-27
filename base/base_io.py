@@ -1,15 +1,30 @@
-from abc import abstractmethod
 from pathlib import Path
-from typing import Any, overload, List, Dict, Union
+from typing import Any, BinaryIO
 
 
-class BaseIO:
+class BaseIOManager:
     """
-    IO mixin
+    Handling IO
     """
 
-    def read_log(self, path: Path, offset: Any) -> Any:
+    path: Path
+    file: BinaryIO | None
+
+    def __init__(self, path: str):
+        self.path = Path(path)
+        self.file = None
+
+    def read(self, offset: Any) -> Any:
         pass
 
-    def append_to_log(self, path: Path, entry: Any) -> None:
+    def append(self, entry: Any) -> None:
         pass
+
+    def open(self):
+        if self.file is None:
+            self.file = open(self.path, "a+b")
+
+    def close(self):
+        if self.file:
+            self.file.close()
+            self.file = None
