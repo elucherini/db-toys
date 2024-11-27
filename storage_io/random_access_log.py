@@ -8,6 +8,9 @@ class RandomAccessLogManager(BaseIOManager):
     """
     Random Access-like IO that reads a line at a given offset and appends to the file.
     """
+    def __init__(self, path):
+        super().__init__(f"{path}/log.txt")
+
     def read(self, offset: int) -> Dict[str, str]:
         self.file.seek(offset)
         key, value = self.file.readline().decode("utf-8").strip().split(",")

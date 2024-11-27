@@ -5,7 +5,7 @@ from storage_io.random_access_log import RandomAccessLogManager
 from base.storage_engine import BaseStorageEngineWithIO
 
 
-PATH = "log.txt"
+PATH = "."
 
 
 class IndexedLogStructuredStorageEngine(BaseStorageEngineWithIO):
@@ -37,9 +37,6 @@ class IndexedLogStructuredStorageEngine(BaseStorageEngineWithIO):
 
 
 def main():
-    # Clean up
-    Path(PATH).unlink(missing_ok=True)
-
     storage = IndexedLogStructuredStorageEngine(PATH)
     storage.set("42", "{example example}")
     storage.set("10", "{another example}")
@@ -54,9 +51,6 @@ def main():
         assert False
     except ValueError:
         pass
-
-    # Clean up
-    Path(PATH).unlink(missing_ok=True)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ Basic log-structured storage engine that appends entries in a CSV-like format ("
 It retrieves the most recent entry for the desired key by going through the whole log in reverse order.
 """
 
-PATH = "log.txt"
+PATH = "."
 
 
 class BaselineLogStructuredStorageEngine(BaseStorageEngineWithIO):
@@ -49,7 +49,7 @@ def main():
     print(storage.get("10"))
     storage.set("42", "{updated}")
     print(storage.get("42"))
-    print(storage.data())
+    print(storage.data)
 
 
 if __name__ == "__main__":

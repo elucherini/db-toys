@@ -9,7 +9,7 @@ class CSVLogManager(BaseIOManager):
     IO module that writes each entry on a separate line as "key,value" and
     """
     def __init__(self, path: str):
-        super().__init__(path)
+        super().__init__(f"{path}/log.txt")
 
     def read(self, offset: None = None) -> List[Dict[str, str]]:
         self.file.seek(0)  # Reset file pointer to the beginning

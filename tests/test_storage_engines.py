@@ -8,8 +8,7 @@ from log_structured.indexed import IndexedLogStructuredStorageEngine
 from log_structured.bitcask import Bitcask
 
 
-TEST_DIR = Path("testfiles")
-TEST_LOG_PATH = str(TEST_DIR / "log.txt")
+TEST_DIR = "testfiles"
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -17,15 +16,16 @@ def clean_testfiles():
     """
     Fixture to ensure the test directory is clean before and after each test.
     """
+    test_dir = Path(TEST_DIR)
     # Teardown: Ensure the directory is deleted before the test starts
-    if TEST_DIR.exists():
-        shutil.rmtree(TEST_DIR)
-    TEST_DIR.mkdir(parents=True)
+    if test_dir.exists():
+        shutil.rmtree(test_dir)
+    test_dir.mkdir(parents=True)
 
     yield  # Run the test
 
     # Cleanup: Delete the directory after the test completes
-    if TEST_DIR.exists():
+    if test_dir.exists():
         shutil.rmtree(TEST_DIR)
 
 
@@ -45,17 +45,17 @@ def storage_engine(request):
 @pytest.mark.parametrize(
     "storage_engine",
     [
-        pytest.param(lambda: BaselineLogStructuredStorageEngine(TEST_LOG_PATH),
+        pytest.param(lambda: BaselineLogStructuredStorageEngine(TEST_DIR),
                      id="BaselineLogStructuredStorageEngine"),
         pytest.param(lambda: BaselineInMemoryLogStructuredStorageEngine(),
                      id="BaselineInMemoryLogStructuredStorageEngine"),
-        pytest.param(lambda: IndexedLogStructuredStorageEngine(TEST_LOG_PATH),
+        pytest.param(lambda: IndexedLogStructuredStorageEngine(TEST_DIR),
                      id="IndexedLogStructuredStorageEngine"),
         # Bitcask with one segment
-        pytest.param(lambda: Bitcask(TEST_LOG_PATH),
+        pytest.param(lambda: Bitcask(TEST_DIR),
                      id="Bitcask_1segment"),
         # Bitcask with multiple segments
-        pytest.param(lambda: Bitcask(TEST_LOG_PATH, max_segment_size=1),
+        pytest.param(lambda: Bitcask(TEST_DIR, max_segment_size=1),
                      id="Bitcask_Ksegments")
     ],
     indirect=True,
