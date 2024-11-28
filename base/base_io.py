@@ -28,3 +28,6 @@ class BaseIOManager:
         if self.file:
             self.file.close()
             self.file = None
+
+    def is_open(self) -> bool:
+        return self.file is not None

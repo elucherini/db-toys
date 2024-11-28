@@ -13,7 +13,11 @@ class RandomAccessLogManager(BaseIOManager):
 
     def read(self, offset: int) -> Dict[str, str]:
         self.file.seek(offset)
-        key, value = self.file.readline().decode("utf-8").strip().split(",")
+        line = self.file.readline()
+        if not line:
+            raise EOFError()
+        line = line.decode("utf-8")
+        key, value = line.strip().split(",")
 
         return {key: value}
 

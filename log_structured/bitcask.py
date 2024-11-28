@@ -13,9 +13,9 @@ class Bitcask(BaseStorageEngine):
     _log_manager: LogSegmentManager
 
     def __init__(self, path: str, max_segment_size: int = 1024 * 1024):
-        self._data = []
         self._log_manager = LogSegmentManager(path, max_segment_size=max_segment_size)
         super().__init__(path)
+        self._data = self._log_manager.rebuild_index()
 
     def get(self, key: str) -> str:
         for i in range(len(self.data) - 1, -1, -1):
@@ -36,16 +36,25 @@ class Bitcask(BaseStorageEngine):
         offset = self._log_manager.set(key, value)
         self._update_index(key, offset)
 
+    def compact(self):
+        self._log_manager.compact()
+        self._data = self._log_manager.rebuild_index()
 
 def main():
-    bitcask = Bitcask(PATH, 1)
+    bitcask = Bitcask(PATH, 20)
 
-    bitcask.set("10", "hello")
-    bitcask.set("42", "hello")
+    bitcask.set("10", "write1")
+    bitcask.set("42", "write1")
     print(bitcask.get("10"))
     print(bitcask.get("42"))
-    bitcask.set("10", "hello_new")
+    bitcask.set("10", "write2")
     print(bitcask.get("10"))
+    bitcask.set("12", "write1")
+    bitcask.set("12", "write2")
+    bitcask.set("11", "write1")
+    print(bitcask.data)
+    bitcask.compact()
+    print(bitcask.data)
 
 
 if __name__ == "__main__":
